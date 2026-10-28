@@ -12,6 +12,7 @@ import platform.Foundation.NSTimeZone
 import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
 import platform.Foundation.localTimeZone
+import platform.Foundation.secondsFromGMT
 import platform.Foundation.timeIntervalSince1970
 import platform.UIKit.UIApplication
 
