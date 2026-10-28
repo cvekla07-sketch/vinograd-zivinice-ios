@@ -2,7 +2,11 @@ package com.vinograd.zivinice
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.setValue
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
@@ -10,8 +14,10 @@ import com.vinograd.zivinice.ekrani.CjenovnikEkran
 import com.vinograd.zivinice.ekrani.DetaljiEkran
 import com.vinograd.zivinice.ekrani.HomeEkran
 import com.vinograd.zivinice.ekrani.KatalogEkran
+import com.vinograd.zivinice.ekrani.KontaktRezervacijeEkran
 import com.vinograd.zivinice.ekrani.KorpaEkran
 import com.vinograd.zivinice.ekrani.NarudzbaEkran
+import com.vinograd.zivinice.ekrani.RezervacijaEkran
 import com.vinograd.zivinice.ekrani.SlikaPrekoEkran
 import com.vinograd.zivinice.podaci.Cjenovnik
 import com.vinograd.zivinice.podaci.Sezona
@@ -36,7 +42,18 @@ fun App() {
         Sezona.osvjezi()
     }
 
+    // Stanje ekrana u stacku (rememberSaveable) ostaje dok je ekran u stacku — kao Activity u pozadini.
+    // Kad se ekran skine sa stacka, njegovo stanje se briše (novo otvaranje kreće od nule).
+    val cuvar = rememberSaveableStateHolder()
+    val velicina = nav.stack.size
+    var najveca by remember { mutableIntStateOf(1) }
+    LaunchedEffect(velicina) {
+        for (i in velicina until najveca) cuvar.removeState(i)
+        najveca = velicina
+    }
+
     VinogradTema {
+        cuvar.SaveableStateProvider(nav.stack.lastIndex) {
         when (val e = nav.trenutni) {
             Ekran.Home -> HomeEkran(nav)
             Ekran.Katalog -> KatalogEkran(nav)
@@ -45,13 +62,14 @@ fun App() {
             Ekran.Korpa -> KorpaEkran(nav)
             Ekran.Narudzba -> NarudzbaEkran(nav)
             Ekran.Cjenovnik -> CjenovnikEkran(nav)
-            Ekran.Rezervacija -> UIzradi("Rezervacija", nav)
-            Ekran.KontaktRezervacije -> UIzradi("Rezervacija", nav)
+            Ekran.Rezervacija -> RezervacijaEkran(nav)
+            is Ekran.KontaktRezervacije -> KontaktRezervacijeEkran(e.stavke, nav)
             Ekran.Tretmani -> UIzradi("Tretmani", nav)
             is Ekran.DetaljiTretmana -> UIzradi("Tretman", nav)
             Ekran.Vodic -> UIzradi("Vodič", nav)
             Ekran.Dnevnik -> UIzradi("Dnevnik", nav)
             Ekran.Kontakt -> UIzradi("Kontakt", nav)
+        }
         }
     }
 }

@@ -85,12 +85,12 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
-private val EMAIL = Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")
+internal val EMAIL = Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")
 
-private fun samoCifre(s: String): String = s.replace(Regex("[^0-9]"), "")
+internal fun samoCifre(s: String): String = s.replace(Regex("[^0-9]"), "")
 
 /** Polja forme — redoslijed = redoslijed provjere (za skrol do prve greške). */
-private enum class Polje { IME, PREZIME, TELEFON, GRAD, POSTANSKI, ADRESA, KONTAKT }
+internal enum class Polje { IME, PREZIME, TELEFON, GRAD, POSTANSKI, ADRESA, KONTAKT }
 
 /** Narudžba — korak 2 (1:1 NarudzbaActivity + activity_narudzba.xml). */
 @Composable
@@ -506,7 +506,7 @@ fun NarudzbaEkran(nav: Navigator) {
 }
 
 @Composable
-private fun NaslovSekcije(tekst: String, modifier: Modifier) {
+internal fun NaslovSekcije(tekst: String, modifier: Modifier) {
     Text(
         tekst, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Boje.TekstSvijetli,
         fontFamily = Poppins(), letterSpacing = 0.12.em, modifier = modifier,
@@ -515,7 +515,7 @@ private fun NaslovSekcije(tekst: String, modifier: Modifier) {
 
 /** TextInputLayout.OutlinedBox (uglovi 14 dp, topla pozadina, errorEnabled → rezervisan prostor za grešku). */
 @Composable
-private fun PoljeForme(
+internal fun PoljeForme(
     vrijednost: String,
     onPromjena: (String) -> Unit,
     natpis: String,

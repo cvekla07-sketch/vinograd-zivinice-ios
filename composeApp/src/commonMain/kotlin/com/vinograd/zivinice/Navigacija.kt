@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vinograd.zivinice.podaci.StavkaRezervacije
 import com.vinograd.zivinice.ui.Boje
 import com.vinograd.zivinice.ui.Poppins
 
@@ -29,7 +30,7 @@ sealed class Ekran {
     data object Narudzba : Ekran()
     data object Cjenovnik : Ekran()
     data object Rezervacija : Ekran()
-    data object KontaktRezervacije : Ekran()
+    data class KontaktRezervacije(val stavke: List<StavkaRezervacije>) : Ekran()  // stavke umjesto Intent nizova
     data object Tretmani : Ekran()
     data class DetaljiTretmana(val mjesecKey: String) : Ekran()
     data object Vodic : Ekran()
