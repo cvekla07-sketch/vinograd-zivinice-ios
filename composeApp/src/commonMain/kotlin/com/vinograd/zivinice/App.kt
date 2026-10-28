@@ -3,7 +3,13 @@ package com.vinograd.zivinice
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import coil3.ImageLoader
+import coil3.compose.setSingletonImageLoaderFactory
+import coil3.network.ktor3.KtorNetworkFetcherFactory
+import com.vinograd.zivinice.ekrani.DetaljiEkran
 import com.vinograd.zivinice.ekrani.HomeEkran
+import com.vinograd.zivinice.ekrani.KatalogEkran
+import com.vinograd.zivinice.ekrani.SlikaPrekoEkran
 import com.vinograd.zivinice.podaci.Cjenovnik
 import com.vinograd.zivinice.podaci.Sezona
 import com.vinograd.zivinice.podaci.Sorte
@@ -14,6 +20,13 @@ import com.vinograd.zivinice.ui.VinogradTema
 fun App() {
     val nav = remember { Navigator() }
 
+    // Coil: slike sorti iz baze (slikaUrl) preko Ktor-a
+    setSingletonImageLoaderFactory { ctx ->
+        ImageLoader.Builder(ctx)
+            .components { add(KtorNetworkFetcherFactory()) }
+            .build()
+    }
+
     LaunchedEffect(Unit) {
         Sorte.osvjezi()
         Cjenovnik.osvjezi()
@@ -23,9 +36,9 @@ fun App() {
     VinogradTema {
         when (val e = nav.trenutni) {
             Ekran.Home -> HomeEkran(nav)
-            Ekran.Katalog -> UIzradi("Katalog", nav)
-            is Ekran.Detalji -> UIzradi(e.naziv, nav)
-            is Ekran.SlikaPreko -> UIzradi(e.naziv, nav)
+            Ekran.Katalog -> KatalogEkran(nav)
+            is Ekran.Detalji -> DetaljiEkran(e.naziv, nav)
+            is Ekran.SlikaPreko -> SlikaPrekoEkran(e.naziv, nav)
             Ekran.Korpa -> UIzradi("Korpa", nav)
             Ekran.Narudzba -> UIzradi("Narudžba", nav)
             Ekran.Cjenovnik -> UIzradi("Cjenovnik", nav)

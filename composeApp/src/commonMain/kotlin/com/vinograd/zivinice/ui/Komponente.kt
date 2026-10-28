@@ -20,6 +20,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
+import org.jetbrains.compose.resources.DrawableResource
 import com.vinograd.zivinice.SlikeSorti
 import org.jetbrains.compose.resources.painterResource
 
@@ -111,4 +121,74 @@ fun VinoPill(tekst: String, modifier: Modifier = Modifier) {
             .background(Boje.Vino)
             .padding(horizontal = 10.dp, vertical = 4.dp),
     )
+}
+
+/**
+ * Slika sorte kao Sorta.slika() na Androidu:
+ * slikaUrl iz baze (Coil) → inače lokalna slika po ključu → inače ZamjenskaSlika.
+ * Dok se slika iz baze učitava (ili ako ne uspije) vidi se ZamjenskaSlika (kao Glide placeholder).
+ */
+@Composable
+fun SlikaSorteMreza(
+    kljuc: String,
+    slikaUrl: String?,
+    modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Crop,
+) {
+    if (slikaUrl != null) {
+        var gotova by remember(slikaUrl) { mutableStateOf(false) }
+        Box(modifier) {
+            if (!gotova) ZamjenskaSlika(Modifier.matchParentSize())
+            AsyncImage(
+                model = slikaUrl,
+                contentDescription = null,
+                contentScale = contentScale,
+                modifier = Modifier.matchParentSize(),
+                onState = { gotova = it is AsyncImagePainter.State.Success },
+            )
+        }
+        return
+    }
+    val res = SlikeSorti.za(kljuc)
+    if (res != null) {
+        Image(
+            painter = painterResource(res),
+            contentDescription = null,
+            contentScale = contentScale,
+            modifier = modifier,
+        )
+    } else {
+        ZamjenskaSlika(modifier)
+    }
+}
+
+/** Okruglo dugme sa ikonom (bg_circle_white / bg_circle_dark_overlay) + opcionalna značka korpe. */
+@Composable
+fun DugmeKrug(
+    ikona: DrawableResource,
+    pozadina: Color,
+    onKlik: () -> Unit,
+    modifier: Modifier = Modifier,
+    znacka: Int = 0,
+) {
+    Box(modifier.size(40.dp)) {
+        Box(
+            Modifier.matchParentSize().clip(CircleShape).background(pozadina).clickable(onClick = onKlik),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(painterResource(ikona), contentDescription = null, tint = Boje.Bijela, modifier = Modifier.size(22.dp))
+        }
+        if (znacka > 0) {
+            Box(
+                Modifier.align(Alignment.TopEnd).size(18.dp)
+                    .clip(RoundedCornerShape(100.dp)).background(Boje.Vino),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    if (znacka > 9) "9+" else znacka.toString(),
+                    fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Boje.Bijela,
+                )
+            }
+        }
+    }
 }
