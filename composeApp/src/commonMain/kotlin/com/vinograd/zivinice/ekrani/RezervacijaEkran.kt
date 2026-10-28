@@ -154,7 +154,7 @@ fun RezervacijaEkran(nav: Navigator) {
         if (sadnica) sadnice = m else reznice = m
     }
 
-    val odabrane: Set<String> = remember(sadnice, reznice) { (sadnice.keys + reznice.keys).toSortedSet() }
+    val odabrane: Set<String> = remember(sadnice, reznice) { (sadnice.keys + reznice.keys).sorted().toSet() }
     val us = sadnice.values.sum()
     val ur = reznice.values.sum()
     val n = odabrane.size
