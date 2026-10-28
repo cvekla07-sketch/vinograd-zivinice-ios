@@ -12,6 +12,8 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.vinograd.zivinice.ekrani.CjenovnikEkran
 import com.vinograd.zivinice.ekrani.DetaljiEkran
+import com.vinograd.zivinice.ekrani.DetaljiTretmanaEkran
+import com.vinograd.zivinice.ekrani.DnevnikEkran
 import com.vinograd.zivinice.ekrani.HomeEkran
 import com.vinograd.zivinice.ekrani.KatalogEkran
 import com.vinograd.zivinice.ekrani.KontaktRezervacijeEkran
@@ -19,6 +21,8 @@ import com.vinograd.zivinice.ekrani.KorpaEkran
 import com.vinograd.zivinice.ekrani.NarudzbaEkran
 import com.vinograd.zivinice.ekrani.RezervacijaEkran
 import com.vinograd.zivinice.ekrani.SlikaPrekoEkran
+import com.vinograd.zivinice.ekrani.TretmaniEkran
+import com.vinograd.zivinice.ekrani.VodicEkran
 import com.vinograd.zivinice.podaci.Cjenovnik
 import com.vinograd.zivinice.podaci.Sezona
 import com.vinograd.zivinice.podaci.Sorte
@@ -64,10 +68,10 @@ fun App() {
             Ekran.Cjenovnik -> CjenovnikEkran(nav)
             Ekran.Rezervacija -> RezervacijaEkran(nav)
             is Ekran.KontaktRezervacije -> KontaktRezervacijeEkran(e.stavke, nav)
-            Ekran.Tretmani -> UIzradi("Tretmani", nav)
-            is Ekran.DetaljiTretmana -> UIzradi("Tretman", nav)
-            Ekran.Vodic -> UIzradi("Vodič", nav)
-            Ekran.Dnevnik -> UIzradi("Dnevnik", nav)
+            Ekran.Tretmani -> TretmaniEkran(nav)
+            is Ekran.DetaljiTretmana -> DetaljiTretmanaEkran(e.mjesecKey, nav)
+            Ekran.Vodic -> VodicEkran(nav)
+            Ekran.Dnevnik -> DnevnikEkran(nav)
             Ekran.Kontakt -> UIzradi("Kontakt", nav)
         }
         }
