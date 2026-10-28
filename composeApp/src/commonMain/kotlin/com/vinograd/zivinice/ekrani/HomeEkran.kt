@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
@@ -298,7 +299,7 @@ fun HomeEkran(nav: Navigator) {
                 BrzaKartica("O aplikaciji", Res.drawable.ic_info, Boje.ChipPozadina, Boje.TekstSporedni) { prikaziInfo = true }
             }
 
-            Spacer(Modifier.height(80.dp + dno))
+            Spacer(Modifier.height(96.dp + dno))
         }
 
         // ===== DONJA NAVIGACIJA =====
@@ -307,8 +308,8 @@ fun HomeEkran(nav: Navigator) {
                 .shadow(12.dp)
                 .background(Boje.ZelenaTamna)
                 .padding(bottom = dno)
-                .height(64.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .height(80.dp),
+            verticalAlignment = Alignment.Top,
         ) {
             NavStavka("Početna", Res.drawable.ic_home, true) {}
             NavStavka("Katalog", Res.drawable.ic_grape, false) { nav.otvori(Ekran.Katalog) }
@@ -397,7 +398,7 @@ private fun KarticaIstaknute(s: Sorta, cijena: String, onKlik: () -> Unit) {
                 fontFamily = Poppins(), maxLines = 1, overflow = TextOverflow.Ellipsis,
             )
             Text(
-                cijena, fontSize = 10.5.sp, lineHeight = 15.sp, maxLines = 2,
+                cijena, fontSize = 10.5.sp, lineHeight = 15.sp, minLines = 2, maxLines = 2,
                 fontWeight = FontWeight.Bold, color = Boje.Vino, fontFamily = Poppins(),
                 modifier = Modifier.padding(top = 2.dp),
             )
@@ -434,16 +435,21 @@ private fun RowScope.BrzaKartica(
 @Composable
 private fun RowScope.NavStavka(tekst: String, ikona: DrawableResource, odabrana: Boolean, onKlik: () -> Unit) {
     val boja = if (odabrana) Color.White else Color(0x99FFFFFF)
+    // Material 3 BottomNavigationView: visina 80 dp, 12 dp odozgo, pill 64×32, tekst 4 dp ispod
     Column(
-        Modifier.weight(1f).clickable(onClick = onKlik),
+        Modifier.weight(1f).fillMaxHeight().clickable(onClick = onKlik).padding(top = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
-            Modifier.clip(RoundedCornerShape(100.dp))
-                .background(if (odabrana) Color(0x33FFFFFF) else Color.Transparent)
-                .padding(horizontal = 18.dp, vertical = 4.dp),
+            Modifier.size(width = 64.dp, height = 32.dp).clip(RoundedCornerShape(100.dp))
+                .background(if (odabrana) Color(0x33FFFFFF) else Color.Transparent),
+            contentAlignment = Alignment.Center,
         ) { Ikona(ikona, boja, 24) }
-        Text(tekst, fontSize = 12.sp, color = boja, fontFamily = Poppins(), modifier = Modifier.padding(top = 4.dp))
+        Text(
+            tekst, fontSize = 12.sp, color = boja, fontFamily = Poppins(), maxLines = 1,
+            fontWeight = if (odabrana) FontWeight.Bold else FontWeight.Medium,
+            modifier = Modifier.padding(top = 4.dp),
+        )
     }
 }
 

@@ -289,7 +289,7 @@ private fun KarticaSorte(s: Sorta, cijene: Map<String, Cijena>, onKlik: () -> Un
                 )
             }
             Text(
-                cijenaTekst, fontSize = 11.5.sp, lineHeight = 16.sp, maxLines = 2,
+                cijenaTekst, fontSize = 11.5.sp, lineHeight = 16.sp, minLines = 2, maxLines = 2,
                 fontWeight = FontWeight.Bold, color = Boje.Vino, fontFamily = Poppins(),
                 modifier = Modifier.padding(top = 4.dp),
             )

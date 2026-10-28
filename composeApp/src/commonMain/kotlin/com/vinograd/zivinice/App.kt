@@ -1,12 +1,15 @@
 package com.vinograd.zivinice
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
@@ -27,7 +30,9 @@ import com.vinograd.zivinice.ekrani.VodicEkran
 import com.vinograd.zivinice.podaci.Cjenovnik
 import com.vinograd.zivinice.podaci.Sezona
 import com.vinograd.zivinice.podaci.Sorte
+import com.vinograd.zivinice.podaci.Uzivo
 import com.vinograd.zivinice.ui.VinogradTema
+import kotlinx.coroutines.launch
 
 /** Glavna aplikacija — kao MainActivity: učita cjenovnik, sorte i sezonu, pa prikazuje ekrane. */
 @Composable
@@ -41,10 +46,11 @@ fun App() {
             .build()
     }
 
+    // Sorte, cjenovnik i sezona se prate uživo, kao Android addValueEventListener
     LaunchedEffect(Unit) {
-        Sorte.osvjezi()
-        Cjenovnik.osvjezi()
-        Sezona.osvjezi()
+        launch { Uzivo.prati("sorte") { Sorte.osvjezi() } }
+        launch { Uzivo.prati("cjenovnik") { Cjenovnik.osvjezi() } }
+        launch { Uzivo.prati("postavke/sezona") { Sezona.osvjezi() } }
     }
 
     // Stanje ekrana u stacku (rememberSaveable) ostaje dok je ekran u stacku — kao Activity u pozadini.
@@ -57,6 +63,11 @@ fun App() {
         najveca = velicina
     }
 
+    // Veliki tekst iz iOS postavki raste najviše do 1,15× — da raspored ne puca
+    val gustina = LocalDensity.current
+    val ogranicena = Density(gustina.density, gustina.fontScale.coerceAtMost(1.15f))
+
+    CompositionLocalProvider(LocalDensity provides ogranicena) {
     VinogradTema {
         cuvar.SaveableStateProvider(nav.stack.lastIndex) {
         when (val e = nav.trenutni) {
@@ -76,5 +87,6 @@ fun App() {
             Ekran.Kontakt -> KontaktEkran(nav)
         }
         }
+    }
     }
 }
