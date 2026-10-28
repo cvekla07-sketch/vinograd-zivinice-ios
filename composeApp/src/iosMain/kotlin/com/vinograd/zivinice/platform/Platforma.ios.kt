@@ -42,3 +42,12 @@ actual fun otvoriLink(url: String) {
     val u = NSURL.URLWithString(url) ?: return
     UIApplication.sharedApplication.openURL(u, options = emptyMap<Any?, Any>(), completionHandler = null)
 }
+
+actual fun otvoriLinkJavi(url: String, rezultat: (Boolean) -> Unit) {
+    val u = NSURL.URLWithString(url)
+    if (u == null) {
+        rezultat(false)
+        return
+    }
+    UIApplication.sharedApplication.openURL(u, options = emptyMap<Any?, Any>()) { uspjeh -> rezultat(uspjeh) }
+}

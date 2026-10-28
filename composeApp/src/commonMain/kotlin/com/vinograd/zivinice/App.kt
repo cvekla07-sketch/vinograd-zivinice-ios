@@ -16,6 +16,7 @@ import com.vinograd.zivinice.ekrani.DetaljiTretmanaEkran
 import com.vinograd.zivinice.ekrani.DnevnikEkran
 import com.vinograd.zivinice.ekrani.HomeEkran
 import com.vinograd.zivinice.ekrani.KatalogEkran
+import com.vinograd.zivinice.ekrani.KontaktEkran
 import com.vinograd.zivinice.ekrani.KontaktRezervacijeEkran
 import com.vinograd.zivinice.ekrani.KorpaEkran
 import com.vinograd.zivinice.ekrani.NarudzbaEkran
@@ -72,7 +73,7 @@ fun App() {
             is Ekran.DetaljiTretmana -> DetaljiTretmanaEkran(e.mjesecKey, nav)
             Ekran.Vodic -> VodicEkran(nav)
             Ekran.Dnevnik -> DnevnikEkran(nav)
-            Ekran.Kontakt -> UIzradi("Kontakt", nav)
+            Ekran.Kontakt -> KontaktEkran(nav)
         }
         }
     }

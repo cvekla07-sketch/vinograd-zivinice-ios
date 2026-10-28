@@ -14,3 +14,6 @@ expect fun kreirajDataStore(ime: String): DataStore<Preferences>
 
 /** Otvara link u sistemskoj aplikaciji (mape, web, telefon…) — kao Intent.ACTION_VIEW. */
 expect fun otvoriLink(url: String)
+
+/** Kao otvoriLink, ali javi da li se link otvorio (false = nema aplikacije / neispravan link). */
+expect fun otvoriLinkJavi(url: String, rezultat: (Boolean) -> Unit)
