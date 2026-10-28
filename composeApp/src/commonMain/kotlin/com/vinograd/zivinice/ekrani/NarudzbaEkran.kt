@@ -62,6 +62,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.vinograd.zivinice.Navigator
+import com.vinograd.zivinice.podaci.JednomNaEkranu
+import com.vinograd.zivinice.podaci.Stat
 import com.vinograd.zivinice.podaci.Cjenovnik
 import com.vinograd.zivinice.podaci.Korpa
 import com.vinograd.zivinice.podaci.KupacPodaci
@@ -97,6 +99,7 @@ internal enum class Polje { IME, PREZIME, TELEFON, GRAD, POSTANSKI, ADRESA, KONT
 fun NarudzbaEkran(nav: Navigator) {
     val scope = rememberCoroutineScope()
     val fokus = LocalFocusManager.current
+    JednomNaEkranu { Stat.dogadjaj(Stat.NARUDZBA_OTVORENA) }
     val gustina = LocalDensity.current
     val skrol = rememberScrollState()
 
@@ -246,6 +249,7 @@ fun NarudzbaEkran(nav: Navigator) {
             val ok = Slanje.posaljiNarudzbu(n)
             salje = false
             if (ok) {
+                Stat.dogadjaj(Stat.NARUDZBA_POSLANA)
                 Korpa.isprazni()
                 uspjeh = n
             } else {

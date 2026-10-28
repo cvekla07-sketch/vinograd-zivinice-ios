@@ -57,6 +57,8 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.vinograd.zivinice.Ekran
 import com.vinograd.zivinice.Navigator
+import com.vinograd.zivinice.podaci.JednomNaEkranu
+import com.vinograd.zivinice.podaci.Stat
 import com.vinograd.zivinice.podaci.Cijena
 import com.vinograd.zivinice.podaci.Cjenovnik
 import com.vinograd.zivinice.podaci.Korpa
@@ -87,6 +89,7 @@ fun KatalogEkran(nav: Navigator) {
     val sorte by Sorte.sve.collectAsState()
     val cijene by Cjenovnik.mapa.collectAsState()
     val korpa by Korpa.stavke.collectAsState(initial = emptyList())
+    JednomNaEkranu { Stat.dogadjaj(Stat.KATALOG) }
 
     var upit by remember { mutableStateOf("") }
     var filter by remember { mutableStateOf(Filter.SVE) }

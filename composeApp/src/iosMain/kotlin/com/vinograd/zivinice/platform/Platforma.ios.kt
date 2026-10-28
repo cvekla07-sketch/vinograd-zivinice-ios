@@ -15,6 +15,20 @@ import platform.Foundation.localTimeZone
 import platform.Foundation.secondsFromGMT
 import platform.Foundation.timeIntervalSince1970
 import platform.UIKit.UIApplication
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
+import kotlinx.cinterop.toKString
+import platform.Foundation.NSBundle
+import platform.Foundation.NSProcessInfo
+import platform.UIKit.UIDevice
+import platform.UserNotifications.UNAuthorizationStatusAuthorized
+import platform.UserNotifications.UNAuthorizationStatusProvisional
+import platform.UserNotifications.UNUserNotificationCenter
+import platform.posix.uname
+import platform.posix.utsname
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 actual fun sadaMs(): Long = (NSDate().timeIntervalSince1970 * 1000.0).toLong()
 
@@ -50,4 +64,29 @@ actual fun otvoriLinkJavi(url: String, rezultat: (Boolean) -> Unit) {
         return
     }
     UIApplication.sharedApplication.openURL(u, options = emptyMap<Any?, Any>()) { uspjeh -> rezultat(uspjeh) }
+}
+
+actual fun jeSimulator(): Boolean =
+    NSProcessInfo.processInfo.environment["SIMULATOR_DEVICE_NAME"] != null
+
+@OptIn(ExperimentalForeignApi::class)
+actual fun modelUredjaja(): String = memScoped {
+    val u = alloc<utsname>()
+    uname(u.ptr)
+    u.machine.toKString()
+}
+
+actual fun verzijaSistema(): String = UIDevice.currentDevice.systemVersion
+
+actual fun verzijaAplikacije(): String =
+    NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String ?: "?"
+
+actual fun verzijaKodAplikacije(): Int =
+    (NSBundle.mainBundle.infoDictionary?.get("CFBundleVersion") as? String)?.toIntOrNull() ?: 0
+
+actual suspend fun notifDozvoljene(): Boolean = suspendCoroutine { k ->
+    UNUserNotificationCenter.currentNotificationCenter().getNotificationSettingsWithCompletionHandler { st ->
+        val s = st?.authorizationStatus
+        k.resume(s == UNAuthorizationStatusAuthorized || s == UNAuthorizationStatusProvisional)
+    }
 }

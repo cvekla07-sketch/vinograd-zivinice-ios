@@ -30,6 +30,8 @@ import com.vinograd.zivinice.ekrani.VodicEkran
 import com.vinograd.zivinice.podaci.Cjenovnik
 import com.vinograd.zivinice.podaci.Sezona
 import com.vinograd.zivinice.podaci.Sorte
+import com.vinograd.zivinice.podaci.Stat
+import com.vinograd.zivinice.podaci.Uredjaj
 import com.vinograd.zivinice.podaci.Uzivo
 import com.vinograd.zivinice.ui.VinogradTema
 import kotlinx.coroutines.launch
@@ -51,6 +53,9 @@ fun App() {
         launch { Uzivo.prati("sorte") { Sorte.osvjezi() } }
         launch { Uzivo.prati("cjenovnik") { Cjenovnik.osvjezi() } }
         launch { Uzivo.prati("postavke/sezona") { Sezona.osvjezi() } }
+        // Brojač posjeta + statistika uređaja (kao MainActivity.onCreate)
+        Stat.posjeta()
+        Uredjaj.zabiljezi()
     }
 
     // Stanje ekrana u stacku (rememberSaveable) ostaje dok je ekran u stacku — kao Activity u pozadini.

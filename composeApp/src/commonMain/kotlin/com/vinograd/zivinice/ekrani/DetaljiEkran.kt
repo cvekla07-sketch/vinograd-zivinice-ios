@@ -58,6 +58,8 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.vinograd.zivinice.Ekran
 import com.vinograd.zivinice.Navigator
+import com.vinograd.zivinice.podaci.JednomNaEkranu
+import com.vinograd.zivinice.podaci.Stat
 import com.vinograd.zivinice.opisSorte
 import com.vinograd.zivinice.podaci.Cjenovnik
 import com.vinograd.zivinice.podaci.Korpa
@@ -93,6 +95,7 @@ fun DetaljiEkran(naziv: String, nav: Navigator) {
 
     val sorta = remember(sve, naziv) { Sorte.poNazivu(naziv) }
     val kljuc = sorta?.kljuc ?: Sorte.kljucOd(naziv)
+    JednomNaEkranu { Stat.sorta(kljuc) }
 
     // Opis (Firebase → fajl → poruka)
     var opis by remember { mutableStateOf<String?>(null) }
@@ -146,6 +149,7 @@ fun DetaljiEkran(naziv: String, nav: Navigator) {
         val t = tip
         scope.launch {
             Korpa.dodaj(naziv, t, k)
+            Stat.dogadjaj(Stat.KORPA)
             val tipLijep = if (t == TIP_SADNICA) "sadnica" else "reznica"
             poruke.currentSnackbarData?.dismiss()
             val tajmer = launch {
