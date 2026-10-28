@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
+import com.vinograd.zivinice.ekrani.CjenovnikEkran
 import com.vinograd.zivinice.ekrani.DetaljiEkran
 import com.vinograd.zivinice.ekrani.HomeEkran
 import com.vinograd.zivinice.ekrani.KatalogEkran
@@ -43,7 +44,7 @@ fun App() {
             is Ekran.SlikaPreko -> SlikaPrekoEkran(e.naziv, nav)
             Ekran.Korpa -> KorpaEkran(nav)
             Ekran.Narudzba -> NarudzbaEkran(nav)
-            Ekran.Cjenovnik -> UIzradi("Cjenovnik", nav)
+            Ekran.Cjenovnik -> CjenovnikEkran(nav)
             Ekran.Rezervacija -> UIzradi("Rezervacija", nav)
             Ekran.KontaktRezervacije -> UIzradi("Rezervacija", nav)
             Ekran.Tretmani -> UIzradi("Tretmani", nav)
