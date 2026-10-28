@@ -9,6 +9,8 @@ import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.vinograd.zivinice.ekrani.DetaljiEkran
 import com.vinograd.zivinice.ekrani.HomeEkran
 import com.vinograd.zivinice.ekrani.KatalogEkran
+import com.vinograd.zivinice.ekrani.KorpaEkran
+import com.vinograd.zivinice.ekrani.NarudzbaEkran
 import com.vinograd.zivinice.ekrani.SlikaPrekoEkran
 import com.vinograd.zivinice.podaci.Cjenovnik
 import com.vinograd.zivinice.podaci.Sezona
@@ -39,8 +41,8 @@ fun App() {
             Ekran.Katalog -> KatalogEkran(nav)
             is Ekran.Detalji -> DetaljiEkran(e.naziv, nav)
             is Ekran.SlikaPreko -> SlikaPrekoEkran(e.naziv, nav)
-            Ekran.Korpa -> UIzradi("Korpa", nav)
-            Ekran.Narudzba -> UIzradi("Narudžba", nav)
+            Ekran.Korpa -> KorpaEkran(nav)
+            Ekran.Narudzba -> NarudzbaEkran(nav)
             Ekran.Cjenovnik -> UIzradi("Cjenovnik", nav)
             Ekran.Rezervacija -> UIzradi("Rezervacija", nav)
             Ekran.KontaktRezervacije -> UIzradi("Rezervacija", nav)

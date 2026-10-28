@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -26,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -112,4 +115,57 @@ fun InfoDijalog(
 @Composable
 private fun DugmeTekst(t: String, boja: Color) {
     Text(t, color = boja, fontSize = 12.sp, fontWeight = FontWeight.Bold, fontFamily = Poppins())
+}
+
+/**
+ * Uspješan dijalog — 1:1 LijepiDialog.success (dialog_success.xml):
+ * krem kartica 88 % širine, zeleni krug sa ikonom, naslov, zlatna linija, poruka, dugme "U redu".
+ * Ne zatvara se dodirom pored (setCancelable(false)).
+ */
+@Composable
+fun UspjehDijalog(ikona: String, naslov: String, poruka: String, onOk: () -> Unit) {
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+            usePlatformDefaultWidth = false,
+        ),
+    ) {
+        Column(
+            Modifier.fillMaxWidth(0.88f)
+                .clip(RoundedCornerShape(20.dp))
+                .background(Color(0xFFFBF6EC))
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Box(
+                Modifier.padding(bottom = 14.dp).size(72.dp).clip(CircleShape).background(Color(0xFFE8F0E2)),
+                contentAlignment = Alignment.Center,
+            ) { Text(ikona, fontSize = 36.sp) }
+            Text(
+                naslov, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1F3D2E),
+                fontFamily = Poppins(), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
+            )
+            Box(
+                Modifier.padding(top = 10.dp, bottom = 14.dp).width(60.dp).height(2.dp)
+                    .background(Color(0xFFC9A961))
+            )
+            Box(Modifier.heightIn(max = 400.dp).verticalScroll(rememberScrollState())) {
+                Text(
+                    poruka, fontSize = 14.sp, color = Color(0xFF3D4A40), fontFamily = Poppins(),
+                    textAlign = TextAlign.Center, lineHeight = 21.sp, modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            Button(
+                onClick = onOk,
+                shape = RoundedCornerShape(100.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1F3D2E)),
+                contentPadding = PaddingValues(vertical = 12.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
+            ) {
+                Text("U redu", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold, fontFamily = Poppins())
+            }
+        }
+    }
 }
