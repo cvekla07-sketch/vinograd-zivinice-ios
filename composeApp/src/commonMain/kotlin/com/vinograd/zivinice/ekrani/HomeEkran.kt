@@ -38,6 +38,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -48,12 +49,14 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.vinograd.zivinice.Ekran
 import com.vinograd.zivinice.Navigator
 import com.vinograd.zivinice.platform.Datum
@@ -301,13 +304,13 @@ fun HomeEkran(nav: Navigator) {
                 BrzaKartica("Katalog", Res.drawable.ic_grape, Boje.KoralPastel, Boje.KoralSrednja) { nav.otvori(Ekran.Katalog) }
                 BrzaKartica("Cjenovnik", Res.drawable.ic_price_tag, Boje.ZelenaPastel, Boje.ZelenaSvijetla) { nav.otvori(Ekran.Cjenovnik) }
                 BrzaKartica("Rezerviši", Res.drawable.ic_calendar, Boje.LjubicastaPastel, Boje.LjubicastaSrednja) { nav.otvori(Ekran.Rezervacija) }
-                BrzaKartica("Tretmani", Res.drawable.ic_leaf, Boje.PlavaPastel, Boje.PlavaSrednja) { nav.otvori(Ekran.Tretmani) }
+                BrzaKartica("Novosti", Res.drawable.ic_news, Boje.ZlatnaSvijetla, Boje.VinoTamno, znacka = nove.size) { nav.otvori(Ekran.Novosti) }
             }
             Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
                 BrzaKartica("Vodič", Res.drawable.ic_book, Boje.NarandzastaPastel, Boje.NarandzastaSrednja) { nav.otvori(Ekran.Vodic) }
                 BrzaKartica("Lokacija", Res.drawable.ic_location, Boje.RozaPastel, Boje.RozaSrednja) { otvoriLink(LINK_MAPA) }
                 BrzaKartica("Kontakt", Res.drawable.ic_contact, Boje.VinoPastel, Boje.Vino) { nav.otvori(Ekran.Kontakt) }
-                BrzaKartica("Novosti", Res.drawable.ic_news, Boje.ZlatnaSvijetla, Boje.VinoTamno, znacka = nove.size) { nav.otvori(Ekran.Novosti) }
+                BrzaKartica("Tretmani", Res.drawable.ic_leaf, Boje.PlavaPastel, Boje.PlavaSrednja) { nav.otvori(Ekran.Tretmani) }
             }
 
             Spacer(Modifier.height(96.dp + dno))
@@ -461,33 +464,54 @@ private fun RowScope.BrzaKartica(
     }
 }
 
-/** Traka "Novo iz vinograda" — vidi se samo dok postoji nepročitana objava. */
+/** Traka "Novo iz vinograda" — zlatna, sa slikom objave; vidi se samo dok postoji nepročitana objava. */
 @Composable
 private fun TrakaNovosti(o: Objava, onKlik: () -> Unit) {
     val oblik = RoundedCornerShape(18.dp)
+    val tamnoZlatna = Color(0xFF412402)
+    val slika by produceState<String?>(null, o.id) { if (o.imaSliku) value = Objave.slika(o.id) }
     Row(
         Modifier.fillMaxWidth().padding(start = 16.dp, top = 14.dp, end = 16.dp)
-            .clip(oblik).background(Boje.PovrsinaTopla)
-            .border(1.5.dp, Boje.Zlatna, oblik)
+            .shadow(4.dp, oblik)
+            .clip(oblik)
+            .background(Brush.linearGradient(listOf(Boje.Zlatna, Color(0xFFB8954C))))
             .clickable(onClick = onKlik)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            Modifier.size(40.dp).clip(CircleShape).background(Boje.ZlatnaSvijetla),
+            Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).background(Boje.ZlatnaSvijetla),
             contentAlignment = Alignment.Center,
-        ) { Ikona(Res.drawable.ic_news, Boje.VinoTamno, 22) }
+        ) {
+            if (slika != null) {
+                AsyncImage(
+                    model = slika, contentDescription = null,
+                    contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize(),
+                )
+            } else {
+                Ikona(Res.drawable.ic_news, Boje.VinoTamno, 26)
+            }
+        }
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "NOVO", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Boje.VinoTamno,
+                    fontFamily = Poppins(), letterSpacing = 1.sp,
+                    modifier = Modifier.clip(RoundedCornerShape(100.dp)).background(Color.White)
+                        .padding(horizontal = 7.dp, vertical = 1.dp),
+                )
+                Text(
+                    "Novo iz vinograda", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = tamnoZlatna,
+                    fontFamily = Poppins(), modifier = Modifier.padding(start = 6.dp),
+                )
+            }
             Text(
-                "NOVO IZ VINOGRADA", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = Boje.Vino,
-                fontFamily = Poppins(), letterSpacing = 1.sp,
-            )
-            Text(
-                o.naslov, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Boje.TekstGlavni,
-                fontFamily = Poppins(), maxLines = 1, overflow = TextOverflow.Ellipsis,
+                o.naslov, fontSize = 14.sp, lineHeight = 18.sp, fontWeight = FontWeight.Bold,
+                color = Boje.TekstGlavni, fontFamily = Poppins(), maxLines = 2, overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = 3.dp),
             )
         }
-        Ikona(Res.drawable.ic_arrow_right, Boje.TekstSporedni, 20)
+        Ikona(Res.drawable.ic_arrow_right, tamnoZlatna, 20)
     }
 }
 

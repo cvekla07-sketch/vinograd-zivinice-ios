@@ -45,6 +45,14 @@ internal object Baza {
         null
     }
 
+    /** Kao citaj, ali razlikuje prazan čvor (JsonNull) od greške / nema interneta (null). */
+    suspend fun citajIliPrazno(putanja: String): JsonElement? = try {
+        val r = http.get("$URL/$putanja.json")
+        if (!r.status.isSuccess()) null else Json.parseToJsonElement(r.bodyAsText())
+    } catch (e: Exception) {
+        null
+    }
+
     /** PUT {putanja}.json — zamjenjuje čvor (kao setValue). */
     suspend fun upisi(putanja: String, tijelo: JsonElement): Boolean = try {
         http.put("$URL/$putanja.json") {

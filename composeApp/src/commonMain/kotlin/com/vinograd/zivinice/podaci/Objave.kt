@@ -44,7 +44,8 @@ object Objave {
 
     /** Učita objave (Uzivo ga zove na svaku promjenu u bazi). */
     suspend fun osvjezi() {
-        val snap = Baza.citaj("objave") as? JsonObject ?: return
+        val odgovor = Baza.citajIliPrazno("objave") ?: return          // nema interneta → ostaje stara lista
+        val snap = odgovor as? JsonObject ?: run { _lista.value = emptyList(); return }   // obrisane sve objave
         _lista.value = snap.mapNotNull { (id, v) ->
             val d = v as? JsonObject ?: return@mapNotNull null
             val naslov = d.tekst("naslov")?.trim().orEmpty()
