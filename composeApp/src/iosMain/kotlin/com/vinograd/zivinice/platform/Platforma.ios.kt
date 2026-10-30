@@ -22,7 +22,10 @@ import kotlinx.cinterop.toKString
 import platform.Foundation.NSBundle
 import platform.Foundation.NSProcessInfo
 import platform.UIKit.UIDevice
+import platform.UserNotifications.UNAuthorizationOptionAlert
+import platform.UserNotifications.UNAuthorizationOptionSound
 import platform.UserNotifications.UNAuthorizationStatusAuthorized
+import platform.UserNotifications.UNAuthorizationStatusNotDetermined
 import platform.UserNotifications.UNAuthorizationStatusProvisional
 import platform.UserNotifications.UNUserNotificationCenter
 import platform.posix.uname
@@ -89,4 +92,16 @@ actual suspend fun notifDozvoljene(): Boolean = suspendCoroutine { k ->
         val s = st?.authorizationStatus
         k.resume(s == UNAuthorizationStatusAuthorized || s == UNAuthorizationStatusProvisional)
     }
+}
+
+actual suspend fun notifNeodredjeno(): Boolean = suspendCoroutine { k ->
+    UNUserNotificationCenter.currentNotificationCenter().getNotificationSettingsWithCompletionHandler { st ->
+        k.resume(st?.authorizationStatus == UNAuthorizationStatusNotDetermined)
+    }
+}
+
+actual fun traziDozvoluNotif(gotovo: () -> Unit) {
+    UNUserNotificationCenter.currentNotificationCenter().requestAuthorizationWithOptions(
+        UNAuthorizationOptionAlert or UNAuthorizationOptionSound
+    ) { _, _ -> gotovo() }
 }

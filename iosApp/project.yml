@@ -9,6 +9,10 @@ settings:
   base:
     MARKETING_VERSION: "4.4"
     CURRENT_PROJECT_VERSION: "1"
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: 12.19.2
 targets:
   iosApp:
     type: application
@@ -16,6 +20,13 @@ targets:
     sources:
       - iosApp
     scheme: {}
+    dependencies:
+      - package: Firebase
+        product: FirebaseMessaging
+    entitlements:
+      path: iosApp/iosApp.entitlements
+      properties:
+        aps-environment: development
     info:
       path: iosApp/Info.plist
       properties:
@@ -28,6 +39,8 @@ targets:
           - UIInterfaceOrientationPortrait
         ITSAppUsesNonExemptEncryption: false
         CADisableMinimumFrameDurationOnPhone: true
+        UIBackgroundModes:
+          - remote-notification
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.vinograd.zivinice

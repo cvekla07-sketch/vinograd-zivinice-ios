@@ -35,3 +35,9 @@ expect fun verzijaKodAplikacije(): Int
 
 /** Da li su notifikacije dozvoljene. */
 expect suspend fun notifDozvoljene(): Boolean
+
+/** iOS još nije pitao korisnika za notifikacije (sistemski prozor se može pokazati). */
+expect suspend fun notifNeodredjeno(): Boolean
+
+/** Sistemski zahtjev za dozvolu notifikacija; gotovo() se zove nakon odgovora. */
+expect fun traziDozvoluNotif(gotovo: () -> Unit)

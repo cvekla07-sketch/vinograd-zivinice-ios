@@ -56,6 +56,18 @@ object Uredjaj {
         }
     }
 
+    /** Nakon odgovora na dozvolu — upiše samo stvarno stanje notifikacija (bez brojanja otvaranja). */
+    fun osvjeziNotif() {
+        if (jeSimulator()) return
+        Stat.opseg.launch {
+            try {
+                val id = ds.data.first()[K_ID] ?: return@launch
+                Baza.dopuni("uredjaji/$id", buildJsonObject { put("notif", notifDozvoljene()) })
+            } catch (_: Exception) {
+            }
+        }
+    }
+
     /** 32 heks znaka — kao UUID.randomUUID() bez crtica. */
     private fun noviId(): String = buildString {
         repeat(32) { append("0123456789abcdef"[Random.nextInt(16)]) }

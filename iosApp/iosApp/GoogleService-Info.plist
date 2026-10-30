@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyCcb1P1UowwBsh7GKc-Dzz3LGhj4tjNebs</string>
+	<key>GCM_SENDER_ID</key>
+	<string>463030969695</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.vinograd.zivinice</string>
+	<key>PROJECT_ID</key>
+	<string>vinograd-zivinice</string>
+	<key>STORAGE_BUCKET</key>
+	<string>vinograd-zivinice.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:463030969695:ios:f5dd5cb0fe82c8206982ea</string>
+	<key>DATABASE_URL</key>
+	<string>https://vinograd-zivinice-default-rtdb.europe-west1.firebasedatabase.app</string>
+</dict>
+</plist>

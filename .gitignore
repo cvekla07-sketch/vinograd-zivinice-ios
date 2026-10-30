@@ -13,8 +13,7 @@ iosApp/iosApp/Info.plist
 xcuserdata/
 DerivedData/
 
-# Firebase konfiguracija i ključevi za potpis ne idu u repozitorij
-GoogleService-Info.plist
+# Ključevi za potpis ne idu u repozitorij (GoogleService-Info.plist ide — nije tajna)
 *.p8
 *.p12
 *.mobileprovision
