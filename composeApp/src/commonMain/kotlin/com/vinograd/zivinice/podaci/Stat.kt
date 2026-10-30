@@ -32,6 +32,8 @@ object Stat {
     const val KORPA = "korpa"
     const val NARUDZBA_OTVORENA = "narudzbaOtvorena"
     const val NARUDZBA_POSLANA = "narudzbaPoslana"
+    const val OBJAVA_OTVORENA = "otvoreno"
+    const val OBJAVA_VIDEO = "video"
 
     /** Statistika nikad ne čeka i ne ruši ekran. */
     internal val opseg = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -70,6 +72,12 @@ object Stat {
     fun sorta(kljuc: String?) {
         if (kljuc.isNullOrEmpty() || jeSimulator()) return
         opseg.launch { Baza.upisi("statistika/sorte/$kljuc", PLUS_JEDAN) }
+    }
+
+    /** Objava "Novo iz vinograda": otvorena / pokrenut video (statistika/objave/{id}/{polje}). */
+    fun objava(id: String, polje: String) {
+        if (jeSimulator()) return
+        opseg.launch { Baza.upisi("statistika/objave/$id/$polje", PLUS_JEDAN) }
     }
 }
 

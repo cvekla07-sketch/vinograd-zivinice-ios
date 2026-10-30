@@ -36,6 +36,8 @@ sealed class Ekran {
     data object Vodic : Ekran()
     data object Dnevnik : Ekran()
     data object Kontakt : Ekran()
+    data object Novosti : Ekran()                                   // Novo iz vinograda
+    data class JednaObjava(val id: String) : Ekran()
 }
 
 /** Stack ekrana — "nazad" skida zadnji (kao back dugme na Androidu). */

@@ -25,12 +25,15 @@ import com.vinograd.zivinice.ekrani.KontaktEkran
 import com.vinograd.zivinice.ekrani.KontaktRezervacijeEkran
 import com.vinograd.zivinice.ekrani.KorpaEkran
 import com.vinograd.zivinice.ekrani.NarudzbaEkran
+import com.vinograd.zivinice.ekrani.NovostiEkran
+import com.vinograd.zivinice.ekrani.ObjavaEkran
 import com.vinograd.zivinice.ekrani.RezervacijaEkran
 import com.vinograd.zivinice.ekrani.SlikaPrekoEkran
 import com.vinograd.zivinice.ekrani.TretmaniEkran
 import com.vinograd.zivinice.ekrani.VodicEkran
 import com.vinograd.zivinice.platform.traziDozvoluNotif
 import com.vinograd.zivinice.podaci.Cjenovnik
+import com.vinograd.zivinice.podaci.Objave
 import com.vinograd.zivinice.podaci.PushEkran
 import com.vinograd.zivinice.podaci.Sezona
 import com.vinograd.zivinice.podaci.Sorte
@@ -59,6 +62,8 @@ fun App() {
         launch { Uzivo.prati("sorte") { Sorte.osvjezi() } }
         launch { Uzivo.prati("cjenovnik") { Cjenovnik.osvjezi() } }
         launch { Uzivo.prati("postavke/sezona") { Sezona.osvjezi() } }
+        launch { Uzivo.prati("objave") { Objave.osvjezi() } }
+        launch { Objave.ucitajProcitane() }
         // Brojač posjeta + statistika uređaja (kao MainActivity.onCreate)
         Stat.posjeta()
         Uredjaj.zabiljezi()
@@ -73,6 +78,7 @@ fun App() {
             "tretmani" -> nav.otvori(Ekran.Tretmani)
             "cjenovnik" -> nav.otvori(Ekran.Cjenovnik)
             "katalog" -> nav.otvori(Ekran.Katalog)
+            "novosti" -> nav.otvori(Ekran.Novosti)
             // "verzija" → App Store stranica nakon objave (Dio 7); do tada samo početna
         }
         PushEkran.obradjeno()
@@ -116,6 +122,8 @@ fun App() {
             Ekran.Vodic -> VodicEkran(nav)
             Ekran.Dnevnik -> DnevnikEkran(nav)
             Ekran.Kontakt -> KontaktEkran(nav)
+            Ekran.Novosti -> NovostiEkran(nav)
+            is Ekran.JednaObjava -> ObjavaEkran(e.id, nav)
         }
         }
         if (notifDijalog) {
