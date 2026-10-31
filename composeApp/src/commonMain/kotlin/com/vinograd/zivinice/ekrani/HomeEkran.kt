@@ -79,6 +79,7 @@ import com.vinograd.zivinice.resources.ic_home
 import com.vinograd.zivinice.resources.ic_info
 import com.vinograd.zivinice.resources.ic_leaf
 import com.vinograd.zivinice.resources.ic_location
+import com.vinograd.zivinice.resources.ic_calculate
 import com.vinograd.zivinice.resources.ic_menu
 import com.vinograd.zivinice.resources.ic_news
 import com.vinograd.zivinice.resources.ic_price_tag
@@ -362,6 +363,7 @@ fun HomeEkran(nav: Navigator) {
                     modifier = Modifier.padding(top = 14.dp, bottom = 6.dp),
                 )
                 RedSheeta(Res.drawable.ic_news, "Novo iz vinograda") { zatvoriPa { nav.otvori(Ekran.Novosti) } }
+                RedSheeta(Res.drawable.ic_calculate, "Kalkulator sadnica") { zatvoriPa { nav.otvori(Ekran.Kalkulator()) } }
                 RedSheeta(Res.drawable.ic_price_tag, "Cjenovnik") { zatvoriPa { nav.otvori(Ekran.Cjenovnik) } }
                 RedSheeta(Res.drawable.ic_calendar, "Rezervacije") { zatvoriPa { nav.otvori(Ekran.Rezervacija) } }
                 RedSheeta(Res.drawable.ic_book, "Vinogradarski vodič i dnevnik") { zatvoriPa { nav.otvori(Ekran.Vodic) } }

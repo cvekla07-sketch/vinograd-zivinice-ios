@@ -67,6 +67,7 @@ import com.vinograd.zivinice.podaci.Sezona
 import com.vinograd.zivinice.podaci.Sorte
 import com.vinograd.zivinice.resources.Res
 import com.vinograd.zivinice.resources.ic_arrow_back
+import com.vinograd.zivinice.resources.ic_calculate
 import com.vinograd.zivinice.resources.ic_cart
 import com.vinograd.zivinice.resources.ic_minus
 import com.vinograd.zivinice.resources.ic_plus
@@ -239,6 +240,20 @@ fun DetaljiEkran(naziv: String, nav: Navigator) {
                             .background(Boje.ObrubMeki)
                     )
                     KolonaCijene("✂️  REZNICA", Boje.TipReznica, cr, naStanjuR, Modifier.weight(1f))
+                }
+
+                // Kalkulator sadnica
+                Row(
+                    Modifier.padding(top = 10.dp).clip(RoundedCornerShape(100.dp))
+                        .clickable { nav.otvori(Ekran.Kalkulator(naziv)) }
+                        .padding(horizontal = 6.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(painterResource(Res.drawable.ic_calculate), null, tint = Boje.Vino, modifier = Modifier.size(18.dp))
+                    Text(
+                        "Koliko mi treba sadnica?", fontSize = 13.sp, fontWeight = FontWeight.Bold,
+                        color = Boje.Vino, fontFamily = Poppins(), modifier = Modifier.padding(start = 6.dp),
+                    )
                 }
 
                 // Opis

@@ -25,6 +25,7 @@ import com.vinograd.zivinice.ekrani.KontaktEkran
 import com.vinograd.zivinice.ekrani.KontaktRezervacijeEkran
 import com.vinograd.zivinice.ekrani.KorpaEkran
 import com.vinograd.zivinice.ekrani.NarudzbaEkran
+import com.vinograd.zivinice.ekrani.KalkulatorEkran
 import com.vinograd.zivinice.ekrani.NovostiEkran
 import com.vinograd.zivinice.ekrani.ObjavaEkran
 import com.vinograd.zivinice.ekrani.RezervacijaEkran
@@ -124,6 +125,7 @@ fun App() {
             Ekran.Kontakt -> KontaktEkran(nav)
             Ekran.Novosti -> NovostiEkran(nav)
             is Ekran.JednaObjava -> ObjavaEkran(e.id, nav)
+            is Ekran.Kalkulator -> KalkulatorEkran(e.sorta, nav)
         }
         }
         if (notifDijalog) {

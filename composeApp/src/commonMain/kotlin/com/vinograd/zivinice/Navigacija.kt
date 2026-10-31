@@ -38,6 +38,7 @@ sealed class Ekran {
     data object Kontakt : Ekran()
     data object Novosti : Ekran()                                   // Novo iz vinograda
     data class JednaObjava(val id: String) : Ekran()
+    data class Kalkulator(val sorta: String? = null) : Ekran()     // kalkulator sadnica
 }
 
 /** Stack ekrana — "nazad" skida zadnji (kao back dugme na Androidu). */

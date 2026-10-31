@@ -36,6 +36,7 @@ import com.vinograd.zivinice.Navigator
 import com.vinograd.zivinice.resources.Res
 import com.vinograd.zivinice.resources.ic_arrow_right
 import com.vinograd.zivinice.resources.ic_book
+import com.vinograd.zivinice.resources.ic_calculate
 import com.vinograd.zivinice.resources.ic_grape
 import com.vinograd.zivinice.resources.ic_leaf
 import com.vinograd.zivinice.ui.Boje
@@ -97,6 +98,12 @@ fun VodicEkran(nav: Navigator) {
                 "Plan zaštite po mjesecima", "Tretmani vinove loze kroz godinu",
                 Modifier.padding(top = 6.dp),
             ) { nav.otvori(Ekran.Tretmani) }
+
+            KarticaVodica(
+                Res.drawable.ic_calculate, Boje.ZelenaPastel, Boje.ZelenaSvijetla,
+                "Kalkulator sadnica", "Koliko sadnica treba za vašu površinu",
+                Modifier.padding(top = 8.dp),
+            ) { nav.otvori(Ekran.Kalkulator()) }
 
             KarticaVodica(
                 Res.drawable.ic_grape, Boje.NarandzastaPastel, Boje.NarandzastaSrednja,
