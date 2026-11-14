@@ -69,6 +69,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vinograd.zivinice.Ekran
 import com.vinograd.zivinice.Navigator
+import com.vinograd.zivinice.podaci.Cijena
 import com.vinograd.zivinice.podaci.Cjenovnik
 import com.vinograd.zivinice.podaci.Sezona
 import com.vinograd.zivinice.podaci.Sorta
@@ -147,8 +148,14 @@ fun RezervacijaEkran(nav: Navigator) {
     val dnoTastatura = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
     val dno: Dp = maxOf(dnoNav, dnoTastatura)
 
+    /** Najviše sadnica date sorte koje se mogu rezervisati (Cijena.BEZ_OGRANICENJA ako broj nije objavljen). */
+    fun najviseSadnica(sorta: String): Int =
+        Cjenovnik.cijenaZaNaziv(sorta)?.najviseSadnica ?: Cijena.BEZ_OGRANICENJA
+
     fun postavi(sorta: String, sadnica: Boolean, nova: Int) {
-        val k = nova.coerceIn(0, 999)
+        // Sadnice: plus i upisan broj staju na dostupnoj količini (upišeš 500, ostane 8)
+        val gornja = if (sadnica) minOf(999, najviseSadnica(sorta)) else 999
+        val k = nova.coerceIn(0, gornja)
         val m = (if (sadnica) sadnice else reznice).toMutableMap()
         if (k > 0) m[sorta] = k else m.remove(sorta)
         if (sadnica) sadnice = m else reznice = m
@@ -163,7 +170,11 @@ fun RezervacijaEkran(nav: Navigator) {
     LaunchedEffect(cijene, sadnice, reznice) {
         val bezS = sadnice.keys.filter { s -> Cjenovnik.cijenaZaNaziv(s)?.naStanjuSadnica == false }
         val bezR = reznice.keys.filter { s -> Cjenovnik.cijenaZaNaziv(s)?.naStanjuReznica == false }
-        if (bezS.isNotEmpty()) sadnice = sadnice - bezS.toSet()
+        // Bez sadnica koje nisu na stanju, a ostale najviše do dostupne količine
+        val noveSadnice = (sadnice - bezS.toSet())
+            .mapValues { (s, k) -> minOf(k, najviseSadnica(s)) }
+            .filterValues { it > 0 }
+        if (noveSadnice != sadnice) sadnice = noveSadnice
         if (bezR.isNotEmpty()) reznice = reznice - bezR.toSet()
     }
 
@@ -350,6 +361,7 @@ fun RezervacijaEkran(nav: Navigator) {
                             kolR = reznice[s.naziv] ?: 0,
                             sOk = c == null || c.naStanjuSadnica,
                             rOk = c == null || c.naStanjuReznica,
+                            najviseS = c?.najviseSadnica ?: Cijena.BEZ_OGRANICENJA,
                             onS = { postavi(s.naziv, true, it) },
                             onR = { postavi(s.naziv, false, it) },
                         )
@@ -431,6 +443,7 @@ fun RezervacijaEkran(nav: Navigator) {
 @Composable
 private fun RedRezervacije(
     s: Sorta, kolS: Int, kolR: Int, sOk: Boolean, rOk: Boolean,
+    najviseS: Int,
     onS: (Int) -> Unit, onR: (Int) -> Unit,
 ) {
     val odabrana = kolS > 0 || kolR > 0
@@ -453,6 +466,16 @@ private fun RedRezervacije(
                 s.tipPrikaz + " · " + s.boja.naziv, fontSize = 11.sp, color = Boje.TekstSvijetli,
                 fontFamily = Poppins(),
             )
+            // Koliko sadnica se još može rezervisati; istaknuto kad je kupac došao do granice
+            if (sOk && najviseS < Cijena.BEZ_OGRANICENJA) {
+                val naGranici = kolS >= najviseS
+                Text(
+                    "Na stanju još $najviseS kom sadnica", fontSize = 11.sp,
+                    fontWeight = if (naGranici) FontWeight.Bold else FontWeight.Normal,
+                    color = if (naGranici) Boje.Vino else Boje.TekstSvijetli,
+                    fontFamily = Poppins(),
+                )
+            }
         }
         Column(horizontalAlignment = Alignment.End) {
             MiniBrojac("🌱", kolS, Boje.TipSadnica, sOk, onS)

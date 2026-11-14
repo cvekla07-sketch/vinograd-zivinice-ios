@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.vinograd.zivinice.Navigator
+import com.vinograd.zivinice.podaci.Cjenovnik
 import com.vinograd.zivinice.podaci.KupacPodaci
 import com.vinograd.zivinice.podaci.Rezervacija
 import com.vinograd.zivinice.podaci.Sezona
@@ -112,6 +113,7 @@ fun KontaktRezervacijeEkran(stavke: List<StavkaRezervacije>, nav: Navigator) {
     var salje by remember { mutableStateOf(false) }
     var dijalogSezona by remember { mutableStateOf(false) }
     var dijalogGreska by remember { mutableStateOf(false) }
+    var dijalogNedostupno by remember { mutableStateOf<String?>(null) }
     var uspjeh by remember { mutableStateOf<Rezervacija?>(null) }
 
     val jeEmail = nacin == Rezervacija.NACIN_EMAIL
@@ -188,6 +190,14 @@ fun KontaktRezervacijeEkran(stavke: List<StavkaRezervacije>, nav: Navigator) {
         }
         if (!validiraj()) return
         fokus.clearFocus()
+
+        // Zadnja provjera stanja sadnica prije slanja
+        val nedostupno = Cjenovnik.provjeriRezervaciju(stavke)
+        if (nedostupno.isNotEmpty()) {
+            dijalogNedostupno = nedostupno +
+                "\n\nVratite se nazad i smanjite količinu, pa pošaljite ponovo."
+            return
+        }
 
         val tIme = ime.trim()
         val tPrezime = prezime.trim()
@@ -453,6 +463,15 @@ fun KontaktRezervacijeEkran(stavke: List<StavkaRezervacije>, nav: Navigator) {
             naslov = "Greška pri slanju",
             sadrzaj = "Nije moguće poslati rezervaciju. Provjerite internet i pokušajte ponovo.",
             onZatvori = { dijalogGreska = false },
+            pozitivTekst = "U redu",
+        )
+    }
+    dijalogNedostupno?.let { tekst ->
+        InfoDijalog(
+            ikona = "ℹ️",
+            naslov = "Količina više nije dostupna",
+            sadrzaj = tekst,
+            onZatvori = { dijalogNedostupno = null },
             pozitivTekst = "U redu",
         )
     }

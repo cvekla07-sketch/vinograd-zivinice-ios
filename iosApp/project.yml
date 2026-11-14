@@ -7,7 +7,7 @@ options:
     iOS: "15.0"
 settings:
   base:
-    MARKETING_VERSION: "4.4"
+    MARKETING_VERSION: "4.7"
     CURRENT_PROJECT_VERSION: "1"
 packages:
   Firebase:

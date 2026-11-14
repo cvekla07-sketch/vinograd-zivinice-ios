@@ -24,7 +24,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
     // FCM token spreman → pretplata na topic, na svakom pokretanju (kao SplashActivity)
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        guard fcmToken != nil else { return }
+        guard let token = fcmToken else { return }
+        // Oznaka telefona ide uz narudžbu i rezervaciju (kao Android 4.6+)
+        PushToken.shared.postavi(token: token)
         Messaging.messaging().subscribe(toTopic: "vinograd_svi")
     }
 

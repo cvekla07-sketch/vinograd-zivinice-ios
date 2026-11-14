@@ -61,7 +61,9 @@ import com.vinograd.zivinice.Navigator
 import com.vinograd.zivinice.podaci.JednomNaEkranu
 import com.vinograd.zivinice.podaci.Stat
 import com.vinograd.zivinice.opisSorte
+import com.vinograd.zivinice.podaci.Cijena
 import com.vinograd.zivinice.podaci.Cjenovnik
+import com.vinograd.zivinice.podaci.Granica
 import com.vinograd.zivinice.podaci.Korpa
 import com.vinograd.zivinice.podaci.Sezona
 import com.vinograd.zivinice.podaci.Sorte
@@ -124,14 +126,25 @@ fun DetaljiEkran(naziv: String, nav: Navigator) {
         else if (tip == TIP_REZNICA && !rOk && sOk) tip = TIP_SADNICA
     }
 
+    // Granica količine: dostupno minus ono što je već u korpi
+    val najvise: Int = c?.najvise(tip) ?: Cijena.BEZ_OGRANICENJA
+    val uKorpi: Int = korpa.firstOrNull { it.sorta == naziv && it.tip == tip }?.kolicina ?: 0
+    val najviseZaDodati: Int = (najvise - uKorpi).coerceAtLeast(0)
+    LaunchedEffect(najviseZaDodati) {
+        if (kolicina > najviseZaDodati) kolicina = maxOf(1, najviseZaDodati)
+    }
+    val napomenaSadnica: String? =
+        if (c != null && naStanjuS && c.imaOgranicenjeSadnica) "Dostupno još ${c.najviseSadnica} kom" else null
+
     // osvjeziDugme()
     val zatvorena = remember(sezona) { Sezona.zatvorena() }
     val dostupno = c == null || c.naStanju(tip)
     val jedinicna = if (tip == TIP_SADNICA) cs else cr
-    val dugmeAktivno = !zatvorena && dostupno
+    val dugmeAktivno = !zatvorena && dostupno && najviseZaDodati > 0
     val dugmeTekst = when {
         zatvorena -> "Sezona zatvorena"
         !dostupno -> "Nema na stanju"
+        najviseZaDodati <= 0 -> "Sve dostupno je već u korpi"
         jedinicna > 0 -> "Dodaj u korpu · " + Cjenovnik.format(jedinicna * kolicina)
         else -> "Dodaj u korpu"
     }
@@ -145,7 +158,26 @@ fun DetaljiEkran(naziv: String, nav: Navigator) {
 
     val otvoriSliku = { nav.otvori(Ekran.SlikaPreko(naziv)) }
 
+    // Kupac je pritisnuo plus na granici: poruka koliko još ima (ne ponavlja se dok je na ekranu)
+    var granicaPrikazana by remember { mutableStateOf(false) }
+    fun javiGranicu() {
+        if (granicaPrikazana) return
+        granicaPrikazana = true
+        val tekst = Granica.tekst(null, najvise, uKorpi)
+        scope.launch {
+            poruke.currentSnackbarData?.dismiss()
+            val tajmer = launch {
+                delay(TRAJANJE_PORUKE_MS)
+                poruke.currentSnackbarData?.dismiss()
+            }
+            poruke.showSnackbar(tekst, duration = SnackbarDuration.Indefinite)
+            tajmer.cancel()
+            granicaPrikazana = false
+        }
+    }
+
     fun dodajUKorpu() {
+        if (kolicina > najviseZaDodati) return
         val k = kolicina
         val t = tip
         scope.launch {
@@ -234,7 +266,7 @@ fun DetaljiEkran(naziv: String, nav: Navigator) {
                         .border(0.5.dp, Boje.ObrubMeki, RoundedCornerShape(18.dp))
                         .padding(14.dp)
                 ) {
-                    KolonaCijene("🌱  SADNICA", Boje.TipSadnica, cs, naStanjuS, Modifier.weight(1f))
+                    KolonaCijene("🌱  SADNICA", Boje.TipSadnica, cs, naStanjuS, Modifier.weight(1f), napomenaSadnica)
                     Box(
                         Modifier.padding(horizontal = 12.dp).width(0.5.dp).fillMaxHeight()
                             .background(Boje.ObrubMeki)
@@ -324,7 +356,10 @@ fun DetaljiEkran(naziv: String, nav: Navigator) {
                         painterResource(Res.drawable.ic_plus), contentDescription = "Više",
                         tint = Boje.TekstGlavni,
                         modifier = Modifier.size(40.dp).clip(RoundedCornerShape(100.dp))
-                            .clickable { if (kolicina < 999) kolicina++ }.padding(11.dp),
+                            .clickable {
+                                if (kolicina < najviseZaDodati) kolicina++
+                                else if (najvise < Cijena.BEZ_OGRANICENJA) javiGranicu()
+                            }.padding(11.dp),
                     )
                 }
 
@@ -364,7 +399,10 @@ fun DetaljiEkran(naziv: String, nav: Navigator) {
 }
 
 @Composable
-private fun KolonaCijene(naslov: String, boja: Color, cijena: Double, naStanju: Boolean, modifier: Modifier) {
+private fun KolonaCijene(
+    naslov: String, boja: Color, cijena: Double, naStanju: Boolean, modifier: Modifier,
+    napomena: String? = null,
+) {
     Column(modifier) {
         Text(
             naslov, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = boja,
@@ -377,6 +415,8 @@ private fun KolonaCijene(naslov: String, boja: Color, cijena: Double, naStanju: 
         )
         if (!naStanju) {
             Text("Nema na stanju", fontSize = 11.sp, color = Boje.VinoSvijetlo, fontFamily = Poppins())
+        } else if (napomena != null) {
+            Text(napomena, fontSize = 11.sp, color = Boje.VinoSvijetlo, fontFamily = Poppins())
         }
     }
 }

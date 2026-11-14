@@ -21,3 +21,17 @@ object PushEkran {
         _ekran.value = null
     }
 }
+
+/**
+ * Oznaka telefona za obavijesti (FCM token). AppDelegate.swift je javi čim je Firebase dodijeli;
+ * šalje se samo uz narudžbu ili rezervaciju. null = još nije poznata.
+ */
+object PushToken {
+    var token: String? = null
+        private set
+
+    /** Poziva AppDelegate.swift. */
+    fun postavi(token: String) {
+        if (token.isNotEmpty()) this.token = token
+    }
+}

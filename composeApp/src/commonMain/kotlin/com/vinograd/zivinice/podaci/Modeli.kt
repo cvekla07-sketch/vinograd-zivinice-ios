@@ -14,6 +14,10 @@ import kotlinx.serialization.json.put
  * da admin panel radi bez izmjena.
  */
 
+/** Verzija za upis uz narudžbu i rezervaciju, npr. "iOS 4.7 (31)". */
+private fun verzijaZaSlanje(): String =
+    "iOS ${com.vinograd.zivinice.platform.verzijaAplikacije()} (${com.vinograd.zivinice.platform.verzijaKodAplikacije()})"
+
 /** Stavka u korpi (lokalno). Ključ za prepoznavanje = tip + sorta. */
 data class StavkaKorpe(val sorta: String, val tip: String, val kolicina: Int) {
     val kljuc: String get() = "$tip::$sorta"
@@ -61,6 +65,9 @@ data class Narudzba(
     val stavke: List<StavkaNarudzbe>,
     val status: String = STATUS_NOVA,
     val vrijeme: Long = sadaMs(),
+    /** Verzija aplikacije iz koje je poslano i oznaka telefona za obavijesti (kao Android 4.6+). */
+    val verzijaAplikacije: String = verzijaZaSlanje(),
+    val fcmToken: String? = PushToken.token,
 ) {
     fun uJson(): JsonObject = buildJsonObject {
         put("id", id)
@@ -77,6 +84,8 @@ data class Narudzba(
         put("kontaktZaRacun", kontaktZaRacun)
         put("postanskiBroj", postanskiBroj)
         put("ukupnoIznos", ukupnoIznos)
+        put("verzijaAplikacije", verzijaAplikacije)
+        if (fcmToken != null) put("fcmToken", fcmToken)
     }
 
     companion object {
@@ -124,6 +133,9 @@ data class Rezervacija(
     val stavke: List<StavkaRezervacije>,
     val status: String = STATUS_NOVA,
     val vrijeme: Long = sadaMs(),
+    /** Verzija aplikacije iz koje je poslano i oznaka telefona za obavijesti (kao Android 4.6+). */
+    val verzijaAplikacije: String = verzijaZaSlanje(),
+    val fcmToken: String? = PushToken.token,
 ) {
     fun uJson(): JsonObject = buildJsonObject {
         put("id", id)
@@ -139,6 +151,8 @@ data class Rezervacija(
         put("status", status)
         put("vrijeme", vrijeme)
         put("stavke", buildJsonArray { stavke.forEach { add(it.uJson()) } })
+        put("verzijaAplikacije", verzijaAplikacije)
+        if (fcmToken != null) put("fcmToken", fcmToken)
     }
 
     companion object {

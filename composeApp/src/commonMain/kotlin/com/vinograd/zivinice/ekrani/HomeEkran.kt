@@ -376,7 +376,11 @@ fun HomeEkran(nav: Navigator) {
 
     if (prikaziInfo) {
         InfoDijalog(
-            ikona = "🍇", naslov = "O aplikaciji", sadrzaj = TEKST_O_APLIKACIJI,
+            ikona = "🍇", naslov = "O aplikaciji",
+            // Verzija se čita sama iz aplikacije, pa se mijenja sa svakom novom verzijom
+            sadrzaj = TEKST_O_APLIKACIJI + "\n\nVerzija " +
+                com.vinograd.zivinice.platform.verzijaAplikacije() +
+                " (" + com.vinograd.zivinice.platform.verzijaKodAplikacije() + ")",
             onZatvori = { prikaziInfo = false }, pozitivTekst = "Zatvori",
         )
     }

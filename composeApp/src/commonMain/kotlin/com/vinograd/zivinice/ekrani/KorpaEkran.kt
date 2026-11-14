@@ -33,6 +33,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,6 +59,7 @@ import com.vinograd.zivinice.Ekran
 import com.vinograd.zivinice.Navigator
 import com.vinograd.zivinice.podaci.Cijena
 import com.vinograd.zivinice.podaci.Cjenovnik
+import com.vinograd.zivinice.podaci.Granica
 import com.vinograd.zivinice.podaci.Korpa
 import com.vinograd.zivinice.podaci.Sezona
 import com.vinograd.zivinice.podaci.Sorte
@@ -83,7 +85,11 @@ import org.jetbrains.compose.resources.painterResource
 private const val TRAJANJE_PORUKE_MS = 2750L
 
 /** Red stavke sa izračunatom cijenom i stanjem (kao petlja u ucitajKorpu). */
-private class RedKorpe(val s: StavkaKorpe, val jedinicna: Double, val dostupno: Boolean) {
+private class RedKorpe(
+    val s: StavkaKorpe, val jedinicna: Double, val dostupno: Boolean,
+    /** Najviše komada koje se mogu naručiti (Cijena.BEZ_OGRANICENJA ako nema ograničenja). */
+    val najvise: Int,
+) {
     val iznos: Double get() = jedinicna * s.kolicina
 }
 
@@ -109,7 +115,10 @@ fun KorpaEkran(nav: Navigator) {
     val redovi: List<RedKorpe> = remember(lista, cijene) {
         lista.map { s ->
             val c: Cijena? = Cjenovnik.cijenaZaNaziv(s.sorta)
-            RedKorpe(s, Cjenovnik.jedinicna(s.sorta, s.tip), c == null || c.naStanju(s.tip))
+            RedKorpe(
+                s, Cjenovnik.jedinicna(s.sorta, s.tip), c == null || c.naStanju(s.tip),
+                c?.najvise(s.tip) ?: Cijena.BEZ_OGRANICENJA,
+            )
         }
     }
     val zatvorena = remember(sezona) { Sezona.zatvorena() }
@@ -125,6 +134,21 @@ fun KorpaEkran(nav: Navigator) {
     val nekeBezCijene = redovi.any { it.jedinicna <= 0 }
     val nekeNedostupne = redovi.any { !it.dostupno }
     val prazna = stavke != null && lista.isEmpty()
+
+    // Ako je u korpi više nego što je sada dostupno, količina se sama smanji (kupac ne ispravlja ništa)
+    LaunchedEffect(redovi) {
+        val previse = redovi.filter { it.dostupno && it.s.kolicina > it.najvise }
+        if (previse.isNotEmpty()) {
+            previse.forEach { Korpa.postaviKolicinu(it.s.sorta, it.s.tip, it.najvise) }
+            porukaZelena = true
+            pokaziPoruku(
+                this, poruke,
+                previse.joinToString("\n") { "${it.s.sorta}: dostupno još ${it.najvise} kom" } +
+                    "\nKoličina u korpi je smanjena.",
+                null,
+            ) {}
+        }
+    }
 
     fun obrisiSaUndo(sorta: String, tip: String, kolicina: Int) {
         scope.launch {
@@ -182,7 +206,14 @@ fun KorpaEkran(nav: Navigator) {
                             else obrisiSaUndo(r.s.sorta, r.s.tip, r.s.kolicina)
                         },
                         onPlus = {
-                            if (r.s.kolicina < 999) scope.launch { Korpa.postaviKolicinu(r.s.sorta, r.s.tip, r.s.kolicina + 1) }
+                            if (r.s.kolicina < r.najvise) {
+                                scope.launch { Korpa.postaviKolicinu(r.s.sorta, r.s.tip, r.s.kolicina + 1) }
+                            } else if (r.najvise < Cijena.BEZ_OGRANICENJA) {
+                                scope.launch {
+                                    porukaZelena = true
+                                    pokaziPoruku(this, poruke, Granica.tekst(r.s.sorta, r.najvise), null) {}
+                                }
+                            }
                         },
                         onObrisi = { obrisiSaUndo(r.s.sorta, r.s.tip, r.s.kolicina) },
                     )

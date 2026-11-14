@@ -128,6 +128,7 @@ fun NarudzbaEkran(nav: Navigator) {
     var salje by remember { mutableStateOf(false) }
     var dijalogSezona by remember { mutableStateOf(false) }
     var dijalogGreska by remember { mutableStateOf(false) }
+    var dijalogNedostupno by remember { mutableStateOf<String?>(null) }
     var uspjeh by remember { mutableStateOf<Narudzba?>(null) }
 
     val jeEmail = nacin == Narudzba.NACIN_EMAIL
@@ -214,6 +215,14 @@ fun NarudzbaEkran(nav: Navigator) {
         }
         if (!validiraj()) return
         fokus.clearFocus()
+
+        // Zadnja provjera stanja prije slanja: korpa je mogla biti napunjena ranije
+        val nedostupno = Cjenovnik.provjeriKorpu(stavke)
+        if (nedostupno.isNotEmpty()) {
+            dijalogNedostupno = nedostupno +
+                "\n\nVratite se u korpu — količina će biti ispravljena, pa pošaljite ponovo."
+            return
+        }
 
         val tIme = ime.trim()
         val tPrezime = prezime.trim()
@@ -493,6 +502,15 @@ fun NarudzbaEkran(nav: Navigator) {
             naslov = "Greška pri slanju",
             sadrzaj = "Nije moguće poslati narudžbu. Provjerite internet i pokušajte ponovo.",
             onZatvori = { dijalogGreska = false },
+            pozitivTekst = "U redu",
+        )
+    }
+    dijalogNedostupno?.let { tekst ->
+        InfoDijalog(
+            ikona = "ℹ️",
+            naslov = "Količina više nije dostupna",
+            sadrzaj = tekst,
+            onZatvori = { dijalogNedostupno = null },
             pozitivTekst = "U redu",
         )
     }

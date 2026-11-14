@@ -9,6 +9,13 @@ import kotlin.math.roundToLong
 /**
  * Cijene jedne sorte — Firebase "cjenovnik/{kljuc}/" (1:1 Cijena.java).
  * naStanju* — ako polje ne postoji u bazi, podrazumijeva se da IMA na stanju.
+ *
+ * dostupnoSadnica / naCekanjuSadnica upisuje LozaManager:
+ *   dostupnoSadnica  = slobodno − rezerva (koliko se još smije prodati)
+ *   naCekanjuSadnica = sadnice iz narudžbi koje još nisu uvezene u LozaManager
+ * Kupac može naručiti najviše dostupno − naČekanju. Ako polja nema u bazi (sorta koje nema
+ * u LozaManageru), ograničenja nema. Aplikacija ova polja samo čita.
+ * naStanjuSadnica je false i kad je oznaka u bazi "ima", a dostupnih komada je 0.
  */
 data class Cijena(
     val cijenaSadnica: Double = 0.0,
@@ -16,8 +23,27 @@ data class Cijena(
     val vrijemeAzuriranja: Long = 0,
     val naStanjuSadnica: Boolean = true,
     val naStanjuReznica: Boolean = true,
+    val dostupnoSadnica: Int? = null,
+    val naCekanjuSadnica: Int? = null,
 ) {
     fun imaCijenu(): Boolean = cijenaSadnica > 0 || cijenaReznica > 0
+
+    /** LozaManager je objavio koliko se sadnica još može naručiti. */
+    val imaOgranicenjeSadnica: Boolean get() = dostupnoSadnica != null
+
+    /** Najviše komada koje kupac može naručiti za tip; reznice i sorte bez broja: BEZ_OGRANICENJA. */
+    fun najvise(tip: String): Int {
+        val d = dostupnoSadnica
+        if (tip != TIP_SADNICA || d == null) return BEZ_OGRANICENJA
+        return (d - (naCekanjuSadnica ?: 0)).coerceIn(0, BEZ_OGRANICENJA)
+    }
+
+    val najviseSadnica: Int get() = najvise(TIP_SADNICA)
+
+    companion object {
+        /** Najveća količina u jednoj stavci kad nema ograničenja. */
+        const val BEZ_OGRANICENJA = 999
+    }
 
     /** Da li se dati tip ("sadnica"/"reznica") trenutno može naručiti. */
     fun naStanju(tip: String): Boolean = if (tip == TIP_SADNICA) naStanjuSadnica else naStanjuReznica
@@ -41,12 +67,18 @@ object Cjenovnik {
         val nova = mutableMapOf<String, Cijena>()
         for ((kljuc, v) in obj) {
             val c = v as? JsonObject ?: continue
+            val dostupno: Int? = c.dugi("dostupnoSadnica")?.toInt()
+            val naCekanju: Int? = c.dugi("naCekanjuSadnica")?.toInt()
+            // Objavljen broj, a dostupnih 0 → sadnica se ponaša kao "nema na stanju"
+            val imaJos = dostupno == null || dostupno - (naCekanju ?: 0) > 0
             nova[kljuc] = Cijena(
                 cijenaSadnica = c.broj("cijenaSadnica") ?: 0.0,
                 cijenaReznica = c.broj("cijenaReznica") ?: 0.0,
                 vrijemeAzuriranja = c.dugi("vrijemeAzuriranja") ?: 0,
-                naStanjuSadnica = c.istina("naStanjuSadnica") ?: true,
+                naStanjuSadnica = (c.istina("naStanjuSadnica") ?: true) && imaJos,
                 naStanjuReznica = c.istina("naStanjuReznica") ?: true,
+                dostupnoSadnica = dostupno,
+                naCekanjuSadnica = naCekanju,
             )
         }
         _mapa.value = nova
@@ -92,10 +124,51 @@ object Cjenovnik {
         return sb.toString()
     }
 
+    /** Provjera prije slanja narudžbe: redovi za stavke koje više nisu dostupne ("" = sve u redu). */
+    fun provjeriKorpu(stavke: List<StavkaKorpe>): String = stavke.mapNotNull { s ->
+        val c = cijenaZaNaziv(s.sorta) ?: return@mapNotNull null
+        when {
+            !c.naStanju(s.tip) -> "${s.sorta}: nema na stanju"
+            s.kolicina > c.najvise(s.tip) -> "${s.sorta}: dostupno još ${c.najvise(s.tip)} kom"
+            else -> null
+        }
+    }.joinToString("\n")
+
+    /** Provjera prije slanja rezervacije — samo sadnice ("" = sve u redu). */
+    fun provjeriRezervaciju(stavke: List<StavkaRezervacije>): String = stavke.mapNotNull { s ->
+        val c = cijenaZaNaziv(s.sorta) ?: return@mapNotNull null
+        when {
+            s.kolicinaSadnica <= 0 -> null
+            !c.naStanjuSadnica -> "${s.sorta}: sadnica nema na stanju"
+            s.kolicinaSadnica > c.najviseSadnica -> "${s.sorta}: dostupno još ${c.najviseSadnica} kom"
+            else -> null
+        }
+    }.joinToString("\n")
+
     /** "12,00 KM" ili "—" */
     fun format(iznos: Double): String {
         if (iznos <= 0) return "—"
         val centi = (iznos * 100).roundToLong()
         return "${centi / 100},${(centi % 100).toString().padStart(2, '0')} KM"
+    }
+}
+
+/**
+ * Poruka kupcu kad dođe do granice dostupne količine sadnica (isti tekst kao na Androidu).
+ * sorta = null kad je jasno o kojoj se radi (ekran detalja).
+ */
+object Granica {
+    /** "komad" za 1, 21, 31...; inače "komada". */
+    private fun komada(n: Int): String = if (n % 10 == 1 && n % 100 != 11) "komad" else "komada"
+
+    fun tekst(sorta: String?, najvise: Int, uKorpi: Int = 0): String {
+        var t = when {
+            najvise <= 0 && sorta == null -> "Ove sorte trenutno nema na stanju."
+            najvise <= 0 -> "$sorta: trenutno nema na stanju."
+            sorta == null -> "Na stanju je još $najvise ${komada(najvise)} ove sorte. Više trenutno nemamo."
+            else -> "$sorta: na stanju je još $najvise ${komada(najvise)}. Više trenutno nemamo."
+        }
+        if (uKorpi > 0) t += " U korpi već imate $uKorpi."
+        return t
     }
 }
